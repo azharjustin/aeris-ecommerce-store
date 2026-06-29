@@ -1,0 +1,6 @@
+/* CartDrawer styles inherited from App.css */
+
+.cart-item-size {
+  color: var(--accent-light);
+  font-weight: 600;
+}
