@@ -21,11 +21,42 @@ export default function ProductForm({ product, onClose }) {
     description: product?.description || '',
   })
 
+  // Sizes 6 to 10 stock mapping state
+  const [stock, setStock] = useState({
+    6: product?.stock?.[6] ?? 10,
+    7: product?.stock?.[7] ?? 10,
+    8: product?.stock?.[8] ?? 10,
+    9: product?.stock?.[9] ?? 10,
+    10: product?.stock?.[10] ?? 10,
+  })
+
+  // Multiple carousel images list state
+  const [carouselImages, setCarouselImages] = useState(
+    product?.images || (product?.image ? [product.image] : [])
+  )
+  const [newImageInput, setNewImageInput] = useState('')
+
   const [saving, setSaving] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setForm(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleStockChange = (size, val) => {
+    const qty = parseInt(val)
+    setStock(prev => ({ ...prev, [size]: isNaN(qty) ? 0 : qty }))
+  }
+
+  const handleAddCarouselImage = (e) => {
+    e.preventDefault()
+    if (!newImageInput.trim()) return
+    setCarouselImages(prev => [...prev, newImageInput.trim()])
+    setNewImageInput('')
+  }
+
+  const handleRemoveCarouselImage = (idx) => {
+    setCarouselImages(prev => prev.filter((_, i) => i !== idx))
   }
 
   const handleSubmit = async (e) => {
@@ -39,6 +70,9 @@ export default function ProductForm({ product, onClose }) {
       rating: parseFloat(form.rating) || 0,
       reviews: parseInt(form.reviews) || 0,
       badge: form.badge || null,
+      image: carouselImages[0] || form.image || '',
+      images: carouselImages,
+      stock: stock,
     }
 
     try {
@@ -198,6 +232,64 @@ export default function ProductForm({ product, onClose }) {
                   <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Image preview</span>
                 </div>
               )}
+            </div>
+
+            {/* Stock Availability */}
+            <div className="admin-section-divider"></div>
+            <h4 className="admin-section-subtitle">Stock Availability (Sizes 6-10)</h4>
+            <div className="admin-stock-grid">
+              {[6, 7, 8, 9, 10].map((size) => (
+                <div key={size} className="admin-stock-field">
+                  <span className="admin-stock-label">US {size}</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={stock[size]}
+                    onChange={(e) => handleStockChange(size, e.target.value)}
+                    className="admin-stock-input"
+                    placeholder="0"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Image Carousel */}
+            <div className="admin-section-divider"></div>
+            <h4 className="admin-section-subtitle">Product Carousel Gallery</h4>
+            <div className="admin-carousel-manager">
+              <div className="admin-carousel-input-row">
+                <input
+                  type="text"
+                  value={newImageInput}
+                  onChange={(e) => setNewImageInput(e.target.value)}
+                  className="admin-form-input"
+                  style={{ flex: 1 }}
+                  placeholder="Paste image URL here..."
+                />
+                <button
+                  type="button"
+                  onClick={handleAddCarouselImage}
+                  className="admin-carousel-btn"
+                >
+                  Add URL
+                </button>
+              </div>
+              
+              <div className="admin-carousel-thumbs-grid">
+                {carouselImages.map((imgUrl, index) => (
+                  <div key={index} className="admin-carousel-thumb-card">
+                    <img src={imgUrl} alt={`Thumbnail ${index + 1}`} />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveCarouselImage(index)}
+                      className="admin-carousel-thumb-remove"
+                      title="Delete"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="admin-form-group">

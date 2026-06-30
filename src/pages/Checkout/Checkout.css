@@ -559,3 +559,65 @@
     font-size: 12px;
   }
 }
+
+/* --- Checkout Saved Addresses Options --- */
+.checkout-saved-addresses-section {
+  margin-bottom: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.checkout-saved-addresses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-md);
+}
+
+.checkout-saved-address-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  cursor: pointer;
+  display: flex;
+  gap: var(--space-sm);
+  transition: all var(--duration-fast) var(--ease-out);
+  align-items: flex-start;
+  min-height: 100px;
+  box-shadow: var(--shadow-sm);
+}
+
+.checkout-saved-address-card:hover {
+  border-color: var(--border-hover);
+}
+
+.checkout-saved-address-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+  background: var(--accent-subtle);
+}
+
+.new-addr-card {
+  border-style: dashed;
+}
+
+.saved-addr-marker {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.checkout-saved-address-card.active .saved-addr-marker {
+  color: var(--accent-light);
+}
+
+.saved-addr-content {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

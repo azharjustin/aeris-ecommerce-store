@@ -58,11 +58,76 @@ export default function Checkout() {
 
   const [errors, setErrors] = useState({})
 
+  // Saved Addresses State
+  const [savedAddresses, setSavedAddresses] = useState([])
+  const [loadingAddresses, setLoadingAddresses] = useState(true)
+  const [selectedAddressIdx, setSelectedAddressIdx] = useState(-1)
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
     if (!user) navigate('/login')
     if (cart.length === 0) navigate('/')
   }, [])
+
+  // Load user's saved addresses from Firestore (with localStorage fallback)
+  useEffect(() => {
+    if (!user) return
+    const fetchSavedAddresses = async () => {
+      setLoadingAddresses(true)
+      try {
+        const docRef = doc(db, 'users', user.uid)
+        const docSnap = await getDoc(docRef)
+        if (docSnap.exists() && docSnap.data().addresses) {
+          setSavedAddresses(docSnap.data().addresses)
+        } else {
+          setSavedAddresses([])
+        }
+      } catch (err) {
+        console.warn('Addresses not available from firestore checkout, using local fallback:', err.message)
+        try {
+          const local = JSON.parse(localStorage.getItem(`addresses_${user.uid}`) || '[]')
+          setSavedAddresses(local)
+        } catch {
+          setSavedAddresses([])
+        }
+      } finally {
+        setLoadingAddresses(false)
+      }
+    }
+    fetchSavedAddresses()
+  }, [user])
+
+  const handleSelectSavedAddress = (idx) => {
+    setSelectedAddressIdx(idx)
+    if (idx === -1) {
+      setAddress({
+        line1: '',
+        line2: '',
+        city: '',
+        state: '',
+        pincode: '',
+        country: 'India',
+      })
+    } else {
+      const selected = savedAddresses[idx]
+      setAddress({
+        line1: selected.line1 || '',
+        line2: selected.line2 || '',
+        city: selected.city || '',
+        state: selected.state || '',
+        pincode: selected.pincode || '',
+        country: selected.country || 'India',
+      })
+    }
+    // Clear validation errors
+    setErrors(prev => ({
+      ...prev,
+      line1: undefined,
+      city: undefined,
+      state: undefined,
+      pincode: undefined,
+    }))
+  }
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0)
   const shipping = subtotal > 200 ? 0 : 12.99
@@ -187,7 +252,13 @@ export default function Checkout() {
         type={type}
         value={obj[key]}
         placeholder={placeholder || label}
-        onChange={e => { setObj(prev => ({ ...prev, [key]: e.target.value })); if (errors[key]) setErrors(ev => ({ ...ev, [key]: undefined })) }}
+        onChange={e => {
+          setObj(prev => ({ ...prev, [key]: e.target.value }))
+          if (errors[key]) setErrors(ev => ({ ...ev, [key]: undefined }))
+          if (setObj === setAddress) {
+            setSelectedAddressIdx(-1)
+          }
+        }}
         {...extra}
       />
       {errors[key] && <span className="form-error">{errors[key]}</span>}
@@ -240,6 +311,49 @@ export default function Checkout() {
           {step === 1 && (
             <div className="form-step" key="step1">
               <h2 className="step-title">Delivery Address</h2>
+
+              {/* Saved Address Selection */}
+              {savedAddresses.length > 0 && (
+                <div className="checkout-saved-addresses-section">
+                  <label className="form-label">Deliver to a Saved Address</label>
+                  <div className="checkout-saved-addresses-grid">
+                    {savedAddresses.map((addr, idx) => (
+                      <div
+                        key={addr.id || idx}
+                        className={`checkout-saved-address-card ${selectedAddressIdx === idx ? 'active' : ''}`}
+                        onClick={() => handleSelectSavedAddress(idx)}
+                      >
+                        <span className="saved-addr-marker">
+                          {selectedAddressIdx === idx ? '●' : '○'}
+                        </span>
+                        <div className="saved-addr-content">
+                          <strong>Address {idx + 1}</strong>
+                          <div>{addr.line1}</div>
+                          {addr.line2 && <div className="text-muted" style={{ fontSize: '11px' }}>{addr.line2}</div>}
+                          <div>{addr.city}, {addr.state}–{addr.pincode}</div>
+                          <div className="text-muted" style={{ fontSize: '11px' }}>{addr.country}</div>
+                        </div>
+                      </div>
+                    ))}
+
+                    <div
+                      className={`checkout-saved-address-card new-addr-card ${selectedAddressIdx === -1 ? 'active' : ''}`}
+                      onClick={() => handleSelectSavedAddress(-1)}
+                    >
+                      <span className="saved-addr-marker">
+                        {selectedAddressIdx === -1 ? '●' : '○'}
+                      </span>
+                      <div className="saved-addr-content">
+                        <strong>+ Deliver to a New Address</strong>
+                        <div className="text-muted" style={{ fontSize: '11px', marginTop: '4px' }}>
+                          Fill out the delivery fields below manually.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {field('Address Line 1', 'line1', address, setAddress, 'text', 'Street, building, area')}
               {field('Address Line 2 (optional)', 'line2', address, setAddress, 'text', 'Apartment, floor, landmark')}
               <div className="form-row">

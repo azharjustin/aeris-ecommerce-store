@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore'
 import { db } from '../../config/firebase'
 import './TrackOrder.css'
 
@@ -58,6 +58,7 @@ export default function TrackOrder() {
   const [inputVal, setInputVal] = useState(state?.prefill || '')
   const [order, setOrder] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
   const [error, setError] = useState('')
   const [visible, setVisible] = useState(false)
 
@@ -155,6 +156,31 @@ export default function TrackOrder() {
     setOrder(null)
     setInputVal('')
     setError('')
+  }
+
+  const handleCancelOrder = async () => {
+    if (!window.confirm('Are you sure you want to cancel this order?')) return
+    setCancelling(true)
+
+    try {
+      if (order._docId) {
+        await updateDoc(doc(db, 'orders', order._docId), { status: 'cancelled' })
+        setOrder(prev => ({ ...prev, status: 'cancelled' }))
+      } else {
+        const local = JSON.parse(localStorage.getItem('aeris_orders') || '[]')
+        const idx = local.findIndex(o => o.orderCode === order.orderCode)
+        if (idx !== -1) {
+          local[idx].status = 'cancelled'
+          localStorage.setItem('aeris_orders', JSON.stringify(local))
+          setOrder(prev => ({ ...prev, status: 'cancelled' }))
+        }
+      }
+    } catch (err) {
+      console.error('Error cancelling order:', err)
+      alert('Failed to cancel order. Please try again.')
+    } finally {
+      setCancelling(false)
+    }
   }
 
   return (
@@ -386,6 +412,16 @@ export default function TrackOrder() {
               <button className="track-btn-primary" onClick={() => navigate('/')} id="track-continue-shopping">
                 Continue Shopping
               </button>
+              {order.status !== 'cancelled' && order.status !== 'delivered' && order.status !== 'shipped' && (
+                <button
+                  className="track-btn-cancel"
+                  onClick={handleCancelOrder}
+                  disabled={cancelling}
+                  id="cancel-order-btn"
+                >
+                  {cancelling ? 'Cancelling...' : 'Cancel Order'}
+                </button>
+              )}
               <button className="track-btn-secondary" onClick={resetSearch} id="track-another-btn">
                 Track Another Order
               </button>
