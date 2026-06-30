@@ -891,7 +891,9 @@
   }
 
   .track-btn-primary,
-  .track-btn-secondary {
+  .track-btn-secondary,
+  .track-btn-cancel {
+    flex: none;
     width: 100%;
     min-width: unset;
     height: 48px;

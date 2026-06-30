@@ -65,6 +65,10 @@
   flex: 1;
 }
 
+.progress-step:last-child {
+  flex: none;
+}
+
 .progress-dot {
   width: 32px;
   height: 32px;
@@ -77,6 +81,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  line-height: 1;
   transition: all var(--duration-normal) var(--ease-out);
   flex-shrink: 0;
 }
@@ -528,6 +533,7 @@
   }
 
   .btn-step-back {
+    flex: none;
     width: 100%;
     height: 46px;
     font-size: 14px;
@@ -535,6 +541,8 @@
 
   .btn-step-next,
   .btn-place-order {
+    flex: none;
+    width: 100%;
     height: 50px;
     font-size: 14px;
   }
