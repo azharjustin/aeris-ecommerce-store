@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import { ProductProvider } from './context/ProductContext'
+import { WishlistProvider } from './context/WishlistContext'
 import { useCart } from './context/CartContext'
 import Navbar from './components/Navbar/Navbar'
 import CartDrawer from './components/CartDrawer/CartDrawer'
@@ -13,6 +14,9 @@ import Product from './pages/Product/Product'
 import Checkout from './pages/Checkout/Checkout'
 import OrderSuccess from './pages/OrderSuccess/OrderSuccess'
 import TrackOrder from './pages/TrackOrder/TrackOrder'
+import Wishlist from './pages/Wishlist/Wishlist'
+import MyOrders from './pages/MyOrders/MyOrders'
+import Account from './pages/Account/Account'
 import AdminLayout from './pages/Admin/AdminLayout'
 import Dashboard from './pages/Admin/Dashboard'
 import OrdersList from './pages/Admin/OrdersList'
@@ -42,25 +46,30 @@ function App() {
     <AuthProvider>
       <ProductProvider>
         <CartProvider>
-          <GlobalOverlays />
-          <Routes>
-            {/* Store Routes — with Navbar */}
-            <Route path="/" element={<><Navbar /><Home /></>} />
-            <Route path="/login" element={<><Navbar /><Login /></>} />
-            <Route path="/product/:id" element={<><Navbar /><Product /></>} />
+          <WishlistProvider>
+            <GlobalOverlays />
+            <Routes>
+              {/* Store Routes — with Navbar */}
+              <Route path="/" element={<><Navbar /><Home /></>} />
+              <Route path="/login" element={<><Navbar /><Login /></>} />
+              <Route path="/product/:id" element={<><Navbar /><Product /></>} />
+              <Route path="/wishlist" element={<><Navbar /><Wishlist /></>} />
+              <Route path="/my-orders" element={<><Navbar /><MyOrders /></>} />
+              <Route path="/account" element={<><Navbar /><Account /></>} />
 
-            {/* Checkout & Success — with Navbar */}
-            <Route path="/checkout" element={<><Navbar /><Checkout /></>} />
-            <Route path="/order-success" element={<><Navbar /><OrderSuccess /></>} />
-            <Route path="/track-order" element={<><Navbar /><TrackOrder /></>} />
+              {/* Checkout & Success — with Navbar */}
+              <Route path="/checkout" element={<><Navbar /><Checkout /></>} />
+              <Route path="/order-success" element={<><Navbar /><OrderSuccess /></>} />
+              <Route path="/track-order" element={<><Navbar /><TrackOrder /></>} />
 
-            {/* Admin Routes — own layout */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="orders" element={<OrdersList />} />
-              <Route path="products" element={<ProductsList />} />
-            </Route>
-          </Routes>
+              {/* Admin Routes — own layout */}
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="orders" element={<OrdersList />} />
+                <Route path="products" element={<ProductsList />} />
+              </Route>
+            </Routes>
+          </WishlistProvider>
         </CartProvider>
       </ProductProvider>
     </AuthProvider>

@@ -2,12 +2,14 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useCart } from '../../context/CartContext'
-import { SearchIcon, CartIcon, XIcon, MenuIcon, LogOutIcon, UserIcon, DashboardIcon, ChevronDownIcon, TruckIcon } from '../common/Icons'
+import { useWishlist } from '../../context/WishlistContext'
+import { SearchIcon, CartIcon, XIcon, MenuIcon, LogOutIcon, UserIcon, DashboardIcon, ChevronDownIcon, TruckIcon, HeartIcon, OrdersIcon } from '../common/Icons'
 import './Navbar.css'
 
 export default function Navbar() {
   const { user, isAdmin, signOut } = useAuth()
   const { cartItemCount, badgeBounce, openCart, searchQuery, setSearchQuery } = useCart()
+  const { wishlistCount } = useWishlist()
   const [scrolled, setScrolled] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -90,6 +92,16 @@ export default function Navbar() {
           </button>
         </form>
 
+        {/* Wishlist */}
+        <Link to="/wishlist" className="wishlist-btn-nav" aria-label="View wishlist" id="wishlist-button">
+          <HeartIcon />
+          {wishlistCount > 0 && (
+            <span className="wishlist-badge">
+              {wishlistCount}
+            </span>
+          )}
+        </Link>
+
         {/* Cart */}
         <button onClick={openCart} className="cart-btn" aria-label="Open cart" id="cart-button">
           <CartIcon />
@@ -123,6 +135,12 @@ export default function Navbar() {
                     <DashboardIcon /> Admin Dashboard
                   </Link>
                 )}
+                <Link to="/account" className="user-dropdown-item" onClick={() => setUserMenuOpen(false)} id="profile-link">
+                  <UserIcon /> My Profile
+                </Link>
+                <Link to="/account" state={{ activeTab: 'orders' }} className="user-dropdown-item" onClick={() => setUserMenuOpen(false)} id="orders-link">
+                  <OrdersIcon /> My Orders
+                </Link>
                 <Link to="/track-order" className="user-dropdown-item" onClick={() => setUserMenuOpen(false)} id="track-order-link">
                   <TruckIcon /> Track Order
                 </Link>

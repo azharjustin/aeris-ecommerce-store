@@ -1,9 +1,11 @@
 import { useState, useCallback } from 'react'
 import { useProducts } from '../../context/ProductContext'
 import { useCart } from '../../context/CartContext'
+import { useWishlist } from '../../context/WishlistContext'
 import useScrollReveal from '../../hooks/useScrollReveal'
 import Hero from '../../components/Hero/Hero'
 import Categories from '../../components/Categories/Categories'
+import FilterBar from '../../components/FilterBar/FilterBar'
 import ProductCard from '../../components/ProductCard/ProductCard'
 import FeaturedBanner from '../../components/FeaturedBanner/FeaturedBanner'
 import Newsletter from '../../components/Newsletter/Newsletter'
@@ -13,16 +15,16 @@ import { TruckIcon, ShieldIcon, RefreshIcon } from '../../components/common/Icon
 export default function Home() {
   const { products } = useProducts()
   const { searchQuery } = useCart()
+  const { wishlist, toggleWishlist } = useWishlist()
+  
   const [activeCategory, setActiveCategory] = useState('All')
-  const [wishlist, setWishlist] = useState(new Set())
+  const [sortBy, setSortBy] = useState('featured')
+  const [priceRange, setPriceRange] = useState([0, 500])
+  const [selectedSizes, setSelectedSizes] = useState(new Set())
 
-  const toggleWishlist = useCallback((id) => {
-    setWishlist((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
+  const handleClearFilters = useCallback(() => {
+    setPriceRange([0, 500])
+    setSelectedSizes(new Set())
   }, [])
 
   // Filter products
@@ -32,10 +34,27 @@ export default function Home() {
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.color || '').toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesCategory && matchesSearch
+    const matchesPrice = Number(p.price) >= priceRange[0] && Number(p.price) <= priceRange[1]
+    const matchesSize = selectedSizes.size === 0 ||
+      (p.sizes || [6, 7, 8, 9, 10]).some(size => selectedSizes.has(size))
+      
+    return matchesCategory && matchesSearch && matchesPrice && matchesSize
   })
 
-  useScrollReveal([activeCategory, searchQuery])
+  // Sort products
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    if (sortBy === 'price-asc') return a.price - b.price
+    if (sortBy === 'price-desc') return b.price - a.price
+    if (sortBy === 'rating') return b.rating - a.rating
+    if (sortBy === 'newest') {
+      if (a.badge === 'new' && b.badge !== 'new') return -1
+      if (b.badge === 'new' && a.badge !== 'new') return 1
+      return 0
+    }
+    return 0 // default 'featured'
+  })
+
+  useScrollReveal([activeCategory, searchQuery, sortBy, priceRange, selectedSizes])
 
   return (
     <>
@@ -44,22 +63,32 @@ export default function Home() {
       <Categories
         activeCategory={activeCategory}
         setActiveCategory={setActiveCategory}
-        productCount={filteredProducts.length}
+        productCount={sortedProducts.length}
+      />
+
+      <FilterBar
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        priceRange={priceRange}
+        setPriceRange={setPriceRange}
+        selectedSizes={selectedSizes}
+        setSelectedSizes={setSelectedSizes}
+        onClearAll={handleClearFilters}
       />
 
       {/* Product Grid */}
       <section className="products-section" id="new-arrivals">
         <div className="products-grid">
-          {filteredProducts.length === 0 ? (
+          {sortedProducts.length === 0 ? (
             <div className="products-empty">
               <div className="products-empty-icon">🔍</div>
               <div className="products-empty-text">No sneakers found</div>
               <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>
-                Try adjusting your search or filter
+                Try adjusting your search or filters
               </p>
             </div>
           ) : (
-            filteredProducts.map((product, idx) => (
+            sortedProducts.map((product, idx) => (
               <ProductCard
                 key={product.id}
                 product={product}

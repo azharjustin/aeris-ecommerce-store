@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useProducts } from '../../context/ProductContext'
 import { useCart } from '../../context/CartContext'
+import { useWishlist } from '../../context/WishlistContext'
 import StarRating from '../../components/common/StarRating'
 import { HeartIcon, CartIcon, ArrowRightIcon, TruckIcon, ShieldIcon, RefreshIcon } from '../../components/common/Icons'
 import './Product.css'
@@ -11,10 +12,10 @@ export default function Product() {
   const navigate = useNavigate()
   const { products } = useProducts()
   const { addToCart, openCart } = useCart()
+  const { isWishlisted, toggleWishlist } = useWishlist()
 
   const product = products.find(p => p.id === id)
   const [selectedSize, setSelectedSize] = useState(null)
-  const [wishlist, setWishlist] = useState(false)
   const [justAdded, setJustAdded] = useState(false)
   const [sizeError, setSizeError] = useState(false)
 
@@ -135,11 +136,11 @@ export default function Product() {
               {justAdded ? '✓ Added to Bag!' : selectedSize ? `Add Size ${selectedSize} to Bag` : 'Select a Size'}
             </button>
             <button
-              className={`btn-wishlist ${wishlist ? 'active' : ''}`}
-              onClick={() => setWishlist(p => !p)}
+              className={`btn-wishlist ${isWishlisted(product.id) ? 'active' : ''}`}
+              onClick={() => toggleWishlist(product.id)}
               aria-label="Add to wishlist"
             >
-              <HeartIcon filled={wishlist} />
+              <HeartIcon filled={isWishlisted(product.id)} />
             </button>
           </div>
 

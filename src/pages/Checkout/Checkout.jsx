@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '../../config/firebase'
 import './Checkout.css'
 
@@ -137,6 +137,31 @@ export default function Checkout() {
 
     try {
       await addDoc(collection(db, 'orders'), order)
+      
+      // Save address to user profile (non-blocking)
+      if (user) {
+        try {
+          const userDocRef = doc(db, 'users', user.uid)
+          const userSnap = await getDoc(userDocRef)
+          const currentAddresses = userSnap.exists() && userSnap.data().addresses ? userSnap.data().addresses : []
+          const exists = currentAddresses.some(addr => 
+            addr.line1?.toLowerCase().trim() === address.line1?.toLowerCase().trim() &&
+            addr.city?.toLowerCase().trim() === address.city?.toLowerCase().trim() &&
+            addr.pincode?.toLowerCase().trim() === address.pincode?.toLowerCase().trim()
+          )
+          
+          if (!exists) {
+            const newAddr = {
+              ...address,
+              id: `addr_${Date.now()}`
+            }
+            await setDoc(userDocRef, { addresses: [...currentAddresses, newAddr] }, { merge: true })
+          }
+        } catch (addrErr) {
+          console.warn('Could not auto-save address to user profile:', addrErr.message)
+        }
+      }
+
       clearCart()
       showToast('Order placed successfully! 🎉')
       navigate('/order-success', { state: { orderCode }, replace: true })
