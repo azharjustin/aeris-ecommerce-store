@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import { ProductProvider } from './context/ProductContext'
@@ -69,6 +70,7 @@ function App() {
                 <Route path="products" element={<ProductsList />} />
               </Route>
             </Routes>
+            <SpeedInsights />
           </WishlistProvider>
         </CartProvider>
       </ProductProvider>
