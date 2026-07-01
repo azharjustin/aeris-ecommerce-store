@@ -129,6 +129,7 @@
   gap: 24px;
   z-index: var(--z-overlay);
   animation: fadeIn 0.2s var(--ease-out);
+  height: fit-content;
 }
 
 .navbar-links.mobile-open a {
@@ -139,7 +140,7 @@
   .nav-login-btn {
     display: none;
   }
-  
+
   .user-avatar-btn svg:last-child {
     display: none;
   }
@@ -180,4 +181,3 @@
   pointer-events: none;
   animation: badgeBounce 0.4s var(--ease-spring);
 }
-
