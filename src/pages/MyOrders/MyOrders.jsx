@@ -28,7 +28,7 @@ export default function MyOrders() {
 
   useEffect(() => {
     if (!user) {
-      navigate('/login')
+      setLoading(false)
       return
     }
 
@@ -113,6 +113,31 @@ export default function MyOrders() {
 
   const handleTrackOrder = (orderCode) => {
     navigate('/track-order', { state: { prefill: orderCode } })
+  }
+
+  if (!user) {
+    return (
+      <div className="my-orders-page">
+        <div className="my-orders-container login-required-container">
+          <div className="login-required-card reveal">
+            <div className="login-required-icon-wrap">
+              <span className="login-required-icon">📦</span>
+            </div>
+            <h2 className="login-required-title">Order History Restricted</h2>
+            <p className="login-required-desc">
+              Please sign in to view your complete order history, track active delivery status, and manage returns.
+            </p>
+            <button 
+              className="btn btn-primary login-required-btn"
+              onClick={() => navigate('/login', { state: { from: '/my-orders' } })}
+              id="orders-login-btn"
+            >
+              Sign In with Google
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { GoogleIcon } from '../../components/common/Icons'
 import './Login.css'
@@ -7,12 +7,15 @@ import './Login.css'
 export default function Login() {
   const { user, isAdmin, signInWithGoogle, loading } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [error, setError] = useState(null)
   const [signingIn, setSigningIn] = useState(false)
 
+  const from = location.state?.from || '/'
+
   // Already logged in → redirect
   if (!loading && user) {
-    return <Navigate to={isAdmin ? '/admin' : '/'} replace />
+    return <Navigate to={isAdmin ? '/admin' : from} replace />
   }
 
   const handleGoogleSignIn = async () => {
@@ -20,7 +23,7 @@ export default function Login() {
     setSigningIn(true)
     try {
       await signInWithGoogle()
-      navigate('/')
+      navigate(from, { replace: true })
     } catch (err) {
       setError(err.message || 'Failed to sign in. Please try again.')
     } finally {

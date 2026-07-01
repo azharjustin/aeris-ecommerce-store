@@ -65,7 +65,6 @@ export default function Checkout() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
-    if (!user) navigate('/login')
     if (cart.length === 0) navigate('/')
   }, [])
 
@@ -176,8 +175,8 @@ export default function Checkout() {
     setPlacing(true)
     const orderCode = generateOrderCode()
     const order = {
-      userId: user.uid,
-      userEmail: user.email,
+      userId: user?.uid || null,
+      userEmail: user?.email || details.email,
       userName: details.name,
       userPhone: details.phone,
       address,

@@ -42,11 +42,7 @@ export default function Account() {
     }
   }, [location.state])
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/login')
-    }
-  }, [user, navigate])
+
 
   // Fetch addresses from firestore
   const fetchAddresses = useCallback(async () => {
@@ -138,7 +134,30 @@ export default function Account() {
     }
   }
 
-  if (!user) return null
+  if (!user) {
+    return (
+      <div className="account-page">
+        <div className="account-container login-required-container">
+          <div className="login-required-card reveal">
+            <div className="login-required-icon-wrap">
+              <span className="login-required-icon">🔒</span>
+            </div>
+            <h2 className="login-required-title">Profile Access Restricted</h2>
+            <p className="login-required-desc">
+              Please sign in to access your profile settings, view saved addresses, and manage your account details.
+            </p>
+            <button 
+              className="btn btn-primary login-required-btn"
+              onClick={() => navigate('/login', { state: { from: '/account' } })}
+              id="account-login-btn"
+            >
+              Sign In with Google
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="account-page">

@@ -17,10 +17,6 @@ export default function CartDrawer({ open, onClose }) {
 
   const handleCheckout = () => {
     onClose()
-    if (!user) {
-      navigate('/login')
-      return
-    }
     navigate('/checkout')
   }
 
@@ -95,7 +91,7 @@ export default function CartDrawer({ open, onClose }) {
               <span className="cart-total-value">${total.toFixed(2)}</span>
             </div>
             <button className="checkout-btn" onClick={handleCheckout}>
-              {user ? `Checkout — $${total.toFixed(2)}` : 'Sign in to Checkout'}
+              Checkout — ${total.toFixed(2)}
             </button>
           </div>
         )}

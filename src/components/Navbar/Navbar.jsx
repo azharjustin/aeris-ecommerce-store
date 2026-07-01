@@ -151,9 +151,33 @@ export default function Navbar() {
             )}
           </div>
         ) : (
-          <Link to="/login" className="btn btn-sm btn-primary nav-login-btn" id="login-btn">
-            Sign In
-          </Link>
+          <div className="user-menu-container" ref={userMenuRef}>
+            <button className="user-avatar-btn" onClick={() => setUserMenuOpen(!userMenuOpen)} id="user-menu-btn">
+              <div className="user-avatar-placeholder"><UserIcon /></div>
+              <ChevronDownIcon />
+            </button>
+            {userMenuOpen && (
+              <div className="user-dropdown">
+                <div className="user-dropdown-header">
+                  <span className="user-dropdown-name">Guest User</span>
+                  <span className="user-dropdown-email">Not signed in</span>
+                </div>
+                <div className="user-dropdown-divider" />
+                <Link to="/login" className="user-dropdown-item" onClick={() => setUserMenuOpen(false)} id="login-link-dropdown" style={{ fontWeight: '700', color: 'var(--accent-light)' }}>
+                  <UserIcon /> Sign In
+                </Link>
+                <Link to="/account" className="user-dropdown-item" onClick={() => setUserMenuOpen(false)} id="profile-link">
+                  <UserIcon /> My Profile
+                </Link>
+                <Link to="/my-orders" className="user-dropdown-item" onClick={() => setUserMenuOpen(false)} id="orders-link">
+                  <OrdersIcon /> My Orders
+                </Link>
+                <Link to="/track-order" className="user-dropdown-item" onClick={() => setUserMenuOpen(false)} id="track-order-link">
+                  <TruckIcon /> Track Order
+                </Link>
+              </div>
+            )}
+          </div>
         )}
 
         <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Menu" id="mobile-menu">
